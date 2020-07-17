@@ -1,7 +1,7 @@
 function makeSpeech(text, filePath, option) {
   var command = "softalk ";
   if (option) {
-    command += optionText;
+    command += option;
   }
   command += " /R:" + filePath + " /W:" + text;
   system.callSystem("cmd.exe /c \"" + command + " \"");

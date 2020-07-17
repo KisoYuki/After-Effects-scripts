@@ -1,8 +1,0 @@
-first line
-
-test
-hello
-
-tesuto
-
-last line

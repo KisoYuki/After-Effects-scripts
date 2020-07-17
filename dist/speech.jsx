@@ -1,5 +1,3 @@
-"use strict";
-
 function makeSpeech(text, filePath, option) {
   var command = "softalk ";
 
@@ -14,19 +12,18 @@ function makeSpeech(text, filePath, option) {
 
 function makeSoftalkOptionText(option) {
   var optionText = '';
-  var optionComamnd;
-  var optionNameToCommand = {
-    speed: 'S',
-    library: 'T',
-    pitch: 'L',
-    accent: 'K',
-    voiceName: 'NM'
-  };
+  var optionNames = ['speed', 'library', 'pitch', 'accent', 'voiceName'];
+  var optionCommands = ['S', 'T', 'L', 'K', 'NM'];
+  var optionName;
+  var optionCommand;
 
-  for (var _i = 0, _Object$keys = Object.keys(optionNameToCommand); _i < _Object$keys.length; _i++) {
-    var optionName = _Object$keys[_i];
-    optionCommand = optionNameToCommand[optionName];
-    optionText += " /" + optionCommand + ":" + option[optionName];
+  for (var i = 0; i < optionNames.length; i++) {
+    optionName = optionNames[i];
+    optionCommand = optionCommands[i];
+
+    if (option[optionName]) {
+      optionText += " /" + optionCommand + ":" + option[optionName];
+    }
   }
 
   return optionText;
