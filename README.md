@@ -1,11 +1,11 @@
-# AfterEffects scripts
-Here are some scripts for AfterEffects.
+# After Effects scripts
+Here are some scripts for After Effects.
 
 ## Usage
-1.Download scripts under dist directory
-2.Open AfterEffects
-3.Choose File > Scripts > Run Script File...
-4.Select the file
+1. Download scripts under dist directory
+2. Open After Effects
+3. Choose File > Scripts > Run Script File...
+4. Select the file
 
 ## Files
 ### dist/make_text_box.jsx
