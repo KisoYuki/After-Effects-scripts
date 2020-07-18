@@ -157,7 +157,6 @@ function readTextFile(textFile) {
 
 
 function setScriptComp(scriptComp, text) {
-  var paraLayers = [];
   var textSetComp = refComps[2];
   var paramsLayer = getLayerByName(textSetComp, "fade parameters");
   var sampleTextLayer = getLayerByName(textSetComp, "sample text");
@@ -216,7 +215,7 @@ function main() {
         fitCompSettingsToBase(scriptComp);
       }
 
-      var textLayers = setScriptComp(scriptComp, text);
+      setScriptComp(scriptComp, text);
     }
   }
 }
