@@ -12,4 +12,4 @@ Here are some scripts for After Effects.
 This script makes a text box below the selected text.
 
 ### dist/fade_up_text.jsx
-This script makes fading-in text by the text file.
+This script makes fading-in text using the selected text files.
