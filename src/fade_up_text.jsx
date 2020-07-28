@@ -11,11 +11,6 @@ var DEFAULT_COMP_SETTINGS = {
 };
 var TEXT_BG_DURATION = 600;
 const DEFAULT_SPEED = 815
-// var DEFAULT_PARAMETERS = {
-//   fadeSpeed: 815,
-//   fadeInterval: 4.0,
-//   sequenceLayers: 0
-// };
 var refComps;
 
 function getCompByName(name) {
@@ -117,12 +112,6 @@ function setReferenceComps() {
     var speedControl = paramsLayer.property("ADBE Effect Parade").addProperty("ADBE Slider Control");
     speedControl.name = "speed";
     speedControl.property("Slider").setValue(DEFAULT_SPEED);
-    // var intervalControl = paramsLayer.property("ADBE Effect Parade").addProperty("ADBE Slider Control");
-    // intervalControl.name = "interval";
-    // intervalControl.property("Slider").setValue(DEFAULT_PARAMETERS.fadeInterval);
-    // var sequenceLayersControl = paramsLayer.property("ADBE Effect Parade").addProperty("ADBE Checkbox Control");
-    // sequenceLayersControl.name = "sequence layers";
-    // sequenceLayersControl.property("Checkbox").setValue(DEFAULT_PARAMETERS.sequenceLayers);
     var sampleTextLayer = textSetComp.layers.addText();
     sampleTextLayer.name = "sample text";
     var textProp = sampleTextLayer.property("sourceText");
@@ -164,11 +153,7 @@ function setScriptComp (scriptComp, text, speed, interval, sequenceLayers) {
   const paramsLayer = getLayerByName(textSetComp, "fade parameters");
   const sampleTextLayer = getLayerByName(textSetComp, "sample text");
   const effects = paramsLayer.property("ADBE Effect Parade");
-  // var speed = effects.property("speed").property("Slider").value;
   effects.property("speed").property("Slider").setValue(speed)
-
-  // var interval = effects.property("interval").property("Slider").value;
-  // var sequenceLayers = effects.property("sequence layers").property("Checkbox").value;
   let currentTime = 0;
   const paragraphLayers = []
   for (const idx in text) {

@@ -5,7 +5,6 @@ var scheduleCounter
 var maxCounter
 
 function makeAudio (text, filePath, optionText) {
-  // let command = "softalkw /X:1 "
   let command = "softalkw /X:1 "
   if (optionText) {
     command += optionText
@@ -14,7 +13,6 @@ function makeAudio (text, filePath, optionText) {
   command += (" /R:\"" + filePath + "\" /W:\"" + newText + "\"")
   if (CURRENT_OS === "WINDOWS") {
     command = "cmd.exe /c \"" + command + "\""
-    // system.callSystem("cmd.exe /c \"" + command + "\"")
   }
   system.callSystem(command)
   return true

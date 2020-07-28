@@ -20,12 +20,7 @@ var DEFAULT_COMP_SETTINGS = {
   bgColor: [0, 0, 0]
 };
 var TEXT_BG_DURATION = 600;
-var DEFAULT_SPEED = 815; // var DEFAULT_PARAMETERS = {
-//   fadeSpeed: 815,
-//   fadeInterval: 4.0,
-//   sequenceLayers: 0
-// };
-
+var DEFAULT_SPEED = 815;
 var refComps;
 
 function getCompByName(name) {
@@ -126,13 +121,7 @@ function setReferenceComps() {
     paramsLayer.name = "fade parameters";
     var speedControl = paramsLayer.property("ADBE Effect Parade").addProperty("ADBE Slider Control");
     speedControl.name = "speed";
-    speedControl.property("Slider").setValue(DEFAULT_SPEED); // var intervalControl = paramsLayer.property("ADBE Effect Parade").addProperty("ADBE Slider Control");
-    // intervalControl.name = "interval";
-    // intervalControl.property("Slider").setValue(DEFAULT_PARAMETERS.fadeInterval);
-    // var sequenceLayersControl = paramsLayer.property("ADBE Effect Parade").addProperty("ADBE Checkbox Control");
-    // sequenceLayersControl.name = "sequence layers";
-    // sequenceLayersControl.property("Checkbox").setValue(DEFAULT_PARAMETERS.sequenceLayers);
-
+    speedControl.property("Slider").setValue(DEFAULT_SPEED);
     var sampleTextLayer = textSetComp.layers.addText();
     sampleTextLayer.name = "sample text";
     var textProp = sampleTextLayer.property("sourceText");
@@ -173,11 +162,8 @@ function setScriptComp(scriptComp, text, speed, interval, sequenceLayers) {
   var textSetComp = refComps[2];
   var paramsLayer = getLayerByName(textSetComp, "fade parameters");
   var sampleTextLayer = getLayerByName(textSetComp, "sample text");
-  var effects = paramsLayer.property("ADBE Effect Parade"); // var speed = effects.property("speed").property("Slider").value;
-
-  effects.property("speed").property("Slider").setValue(speed); // var interval = effects.property("interval").property("Slider").value;
-  // var sequenceLayers = effects.property("sequence layers").property("Checkbox").value;
-
+  var effects = paramsLayer.property("ADBE Effect Parade");
+  effects.property("speed").property("Slider").setValue(speed);
   var currentTime = 0;
   var paragraphLayers = [];
 

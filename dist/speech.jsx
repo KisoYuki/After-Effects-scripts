@@ -15,7 +15,6 @@ var scheduleCounter;
 var maxCounter;
 
 function makeAudio(text, filePath, optionText) {
-  // let command = "softalkw /X:1 "
   var command = "softalkw /X:1 ";
 
   if (optionText) {
@@ -26,7 +25,7 @@ function makeAudio(text, filePath, optionText) {
   command += " /R:\"" + filePath + "\" /W:\"" + newText + "\"";
 
   if (CURRENT_OS === "WINDOWS") {
-    command = "cmd.exe /c \"" + command + "\""; // system.callSystem("cmd.exe /c \"" + command + "\"")
+    command = "cmd.exe /c \"" + command + "\"";
   }
 
   system.callSystem(command);
