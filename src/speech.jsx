@@ -1,14 +1,23 @@
+const CURRENT_OS = $.os.toLowerCase().indexOf('mac') >= 0 ? "MAC": "WINDOWS"
 var audioImportTask
 var layerSettings = []
+var scheduleCounter
+var maxCounter
+
 function makeAudio (text, filePath, optionText) {
-  let command = "softalk "
+  // let command = "softalkw /X:1 "
+  let command = "softalkw /X:1 "
   if (optionText) {
     command += optionText
   }
-  const newText = text.replace(RegExp(String.fromCharCode(13), "g"), "　")
+  const newText = text.replace(RegExp(String.fromCharCode(13), "g"), " ")
   command += (" /R:\"" + filePath + "\" /W:\"" + newText + "\"")
-  system.callSystem("cmd.exe /c \"" + command + "\"");
-  return true;
+  if (CURRENT_OS === "WINDOWS") {
+    command = "cmd.exe /c \"" + command + "\""
+    // system.callSystem("cmd.exe /c \"" + command + "\"")
+  }
+  system.callSystem(command)
+  return true
 }
 
 function makeSoftalkOptionText (option) {
@@ -50,18 +59,9 @@ function makeFileName (text) {
   return fileName + "_" + hash
 }
 
-function isEmpty(obj) {
-  for(var prop in obj) {
-    if(obj.hasOwnProperty(prop)) {
-      return false;
-    }
-  }
-  return JSON.stringify(obj) === JSON.stringify({});
-}
-
-
 function importAudio () {
-  const importedLayers = []
+  scheduleCounter += 1
+  const notImportedSettings = []
   for (const layerSetting of layerSettings) {
     const { audioPath, textLayer } = layerSetting
     const audioFile = new File(audioPath)
@@ -72,33 +72,39 @@ function importAudio () {
       audioLayer.startTime = textLayer.startTime
       audioLayer.inPoint = textLayer.inPoint
       audioLayer.outPoint = textLayer.outPoint
-      importedLayers.push(textLayer)
+      audioLayer.moveAfter(textLayer)
+    } else {
+      notImportedSettings.push(layerSetting)
     }
   }
-  for (const importedLayer of importedLayers) {
-    delete audioPathToAttr[importedLayer]
-  }
-  if (isEmpty(audioPathToAttr)) {
+  if (notImportedSettings.length === 0) {
+    app.cancelTask(audioImportTask)
+    alert("finished making audio")
+  } else if (scheduleCounter > maxCounter) {
+    alert("couldn't make audio")
     app.cancelTask(audioImportTask)
   }
+  layerSettings = notImportedSettings
 }
 
-function addAudio (textLayers, audioFolderName, option) {
-  const optionText = makeSoftalkOptionText(option)
+function addAudio (textLayers, audioFolderName, optionText) {
   for (const textLayer of textLayers) {
     const text = String(textLayer.sourceText.value)
     const audioPath = audioFolderName + "\\" + makeFileName(text) + ".wav"
     makeAudio(text, audioPath, optionText)
     layerSettings.push({ audioPath: audioPath, textLayer: textLayer })
   }
-  audioImportTask = app.scheduleTask('importAudio()', 3000, true)
+  scheduleCounter = 0
+  maxCounter = textLayers.length * 2
+  audioImportTask = app.scheduleTask('importAudio()', 5000, true)
 }
 
-function main (option) {
+function runSelectedLayers (option) {
   const activeComp = app.project.activeItem
   const audioFolderName = Folder.selectDialog(
     "please select destination audio folder").fsName
-  addAudio(activeComp.selectedLayers, audioFolderName, option)
+  const optionText = makeSoftalkOptionText(option)
+  addAudio(activeComp.selectedLayers, audioFolderName, optionText)
 }
 
-main({speed: 100, pitch: 100, voiceName: "woman"})
+// runSelectedLayers({speed: 100, pitch: 100, voiceName: "woman"})

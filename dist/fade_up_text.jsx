@@ -1,5 +1,15 @@
 #include 'align_to_rect.jsx';
 
+var _arrayIsArray = function _arrayIsArray(arg) {
+  return Object.prototype.toString.call(arg) === '[object Array]';
+};
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (_arrayIsArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 // refs: http://docs.aenhancers.com/other/textdocument/
 var DEFAULT_COMP_SETTINGS = {
   width: 1920,
@@ -10,11 +20,12 @@ var DEFAULT_COMP_SETTINGS = {
   bgColor: [0, 0, 0]
 };
 var TEXT_BG_DURATION = 600;
-var DEFAULT_PARAMETERS = {
-  fadeSpeed: 815,
-  fadeInterval: 4.0,
-  sequenceLayers: 0
-};
+var DEFAULT_SPEED = 815; // var DEFAULT_PARAMETERS = {
+//   fadeSpeed: 815,
+//   fadeInterval: 4.0,
+//   sequenceLayers: 0
+// };
+
 var refComps;
 
 function getCompByName(name) {
@@ -78,7 +89,13 @@ function setReferenceComps() {
   var baseComp = getCompByName("base comp");
 
   if (!baseComp) {
-    baseComp = app.project.items.addComp("base comp", DEFAULT_COMP_SETTINGS.width, DEFAULT_COMP_SETTINGS.height, DEFAULT_COMP_SETTINGS.pixelAspect, DEFAULT_COMP_SETTINGS.duration, DEFAULT_COMP_SETTINGS.frameRate);
+    var settings = DEFAULT_COMP_SETTINGS;
+
+    if (app.project.activeItem) {
+      settings = app.project.activeItem;
+    }
+
+    baseComp = app.project.items.addComp("base comp", settings.width, settings.height, settings.pixelAspect, settings.duration, settings.frameRate);
   }
 
   var textBGComp = getCompByName("text BG");
@@ -109,13 +126,13 @@ function setReferenceComps() {
     paramsLayer.name = "fade parameters";
     var speedControl = paramsLayer.property("ADBE Effect Parade").addProperty("ADBE Slider Control");
     speedControl.name = "speed";
-    speedControl.property("Slider").setValue(DEFAULT_PARAMETERS.fadeSpeed);
-    var intervalControl = paramsLayer.property("ADBE Effect Parade").addProperty("ADBE Slider Control");
-    intervalControl.name = "interval";
-    intervalControl.property("Slider").setValue(DEFAULT_PARAMETERS.fadeInterval);
-    var sequenceLayersControl = paramsLayer.property("ADBE Effect Parade").addProperty("ADBE Checkbox Control");
-    sequenceLayersControl.name = "sequence layers";
-    sequenceLayersControl.property("Checkbox").setValue(DEFAULT_PARAMETERS.sequenceLayers);
+    speedControl.property("Slider").setValue(DEFAULT_SPEED); // var intervalControl = paramsLayer.property("ADBE Effect Parade").addProperty("ADBE Slider Control");
+    // intervalControl.name = "interval";
+    // intervalControl.property("Slider").setValue(DEFAULT_PARAMETERS.fadeInterval);
+    // var sequenceLayersControl = paramsLayer.property("ADBE Effect Parade").addProperty("ADBE Checkbox Control");
+    // sequenceLayersControl.name = "sequence layers";
+    // sequenceLayersControl.property("Checkbox").setValue(DEFAULT_PARAMETERS.sequenceLayers);
+
     var sampleTextLayer = textSetComp.layers.addText();
     sampleTextLayer.name = "sample text";
     var textProp = sampleTextLayer.property("sourceText");
@@ -152,73 +169,86 @@ function readTextFile(textFile) {
   return text;
 }
 
-function setScriptComp(scriptComp, text) {
+function setScriptComp(scriptComp, text, speed, interval, sequenceLayers) {
   var textSetComp = refComps[2];
   var paramsLayer = getLayerByName(textSetComp, "fade parameters");
   var sampleTextLayer = getLayerByName(textSetComp, "sample text");
-  var effects = paramsLayer.property("ADBE Effect Parade");
-  var speed = effects.property("speed").property("Slider").value;
-  var interval = effects.property("interval").property("Slider").value;
-  var sequenceLayers = effects.property("sequence layers").property("Checkbox").value;
+  var effects = paramsLayer.property("ADBE Effect Parade"); // var speed = effects.property("speed").property("Slider").value;
+
+  effects.property("speed").property("Slider").setValue(speed); // var interval = effects.property("interval").property("Slider").value;
+  // var sequenceLayers = effects.property("sequence layers").property("Checkbox").value;
+
   var currentTime = 0;
+  var paragraphLayers = [];
 
-  for (var i = 0; i < text.length; i++) {
-    var paragraph = text[i];
-    var paraLayer = getTextLayerBySourceText(scriptComp, paragraph);
+  for (var idx in text) {
+    var paragraph = text[idx];
+    var paragraphLayer = getTextLayerBySourceText(scriptComp, paragraph);
 
-    if (!paraLayer) {
-      sampleTextLayer.copyToComp(scriptComp);
-      paraLayer = getLayerByName(scriptComp, "sample text");
-      paraLayer.sourceText.setValue(paragraph);
+    if (paragraphLayer) {
+      applyFadeToLayer(paragraphLayer);
     } else {
-      applyFadeToLayer(paraLayer);
+      sampleTextLayer.copyToComp(scriptComp);
+      paragraphLayer = getLayerByName(scriptComp, "sample text");
+      paragraphLayer.sourceText.setValue(paragraph);
     }
 
-    paraLayer.name = "paragraph " + i;
+    paragraphLayer.name = "paragraph " + idx;
     var duration = 100 * paragraph.length / speed + interval;
 
-    if (sequenceLayers == 0) {
-      currentTime = paraLayer.startTime;
+    if (!sequenceLayers) {
+      currentTime = paragraphLayer.startTime;
     }
 
-    paraLayer.startTime = currentTime;
-    paraLayer.inPoint = currentTime;
-    paraLayer.outPoint = currentTime + duration;
+    paragraphLayer.startTime = currentTime;
+    paragraphLayer.inPoint = currentTime;
+    paragraphLayer.outPoint = currentTime + duration;
     currentTime += duration;
-    placeLayerOnBG(paraLayer);
+    placeLayerOnBG(paragraphLayer);
+    paragraphLayers.push(paragraphLayer);
   }
 
   if (scriptComp.duration < currentTime) {
     scriptComp.duration = currentTime;
   }
+
+  return paragraphLayers;
 }
 
-function main() {
-  var textFiles = File.openDialog("please select text file", "*.txt", true);
+function makeFadeUpText(textFiles, speed, interval, sequenceLayers) {
+  refComps = setReferenceComps();
+  var baseComp = refComps[0];
+  var textBGComp = refComps[1];
+  var paragraphLayers = [];
 
-  if (textFiles) {
-    refComps = setReferenceComps();
-    var baseComp = refComps[0];
-    var textBGComp = refComps[1];
+  var _iterator = _createForOfIteratorHelper(textFiles),
+      _step;
 
-    for (var i = 0; i < textFiles.length; i++) {
-      var textFile = textFiles[i];
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var textFile = _step.value;
       var fileName = textFile.name.substring(0, textFile.name.length - 4);
       fileName = decodeURI(fileName);
       var text = readTextFile(textFile).split(String.fromCharCode(13) + String.fromCharCode(13));
       var scriptComp = getCompByName(fileName);
 
-      if (!scriptComp) {
+      if (scriptComp) {
+        fitCompSettingsToBase(scriptComp);
+      } else {
         scriptComp = baseComp.duplicate();
         scriptComp.name = fileName;
         scriptComp.layers.add(textBGComp);
-      } else {
-        fitCompSettingsToBase(scriptComp);
       }
 
-      setScriptComp(scriptComp, text);
+      var tempLayers = setScriptComp(scriptComp, text, speed, interval, sequenceLayers);
+      paragraphLayers = paragraphLayers.concat(tempLayers);
     }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
   }
-}
 
-main();
+  return paragraphLayers;
+} // var textFiles = File.openDialog("please select text file", "*.txt", true);
+// makeFadeUpText(textFiles, 800, 4, true)
